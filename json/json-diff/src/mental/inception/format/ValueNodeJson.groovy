@@ -7,7 +7,7 @@ class ValueNodeJson {
 	def format(node) {
 		def oldValue = node.value.oldValue
 		def newValue = node.value.newValue
-		String type = getType(oldValue, newValue)
+		def type = node.value.type
 		return buildJson(oldValue, newValue, type)
 	}
 
@@ -17,18 +17,6 @@ class ValueNodeJson {
 			"old" oldValue
 			"new" newValue
 			'$type' type
-		}
-	}
-
-	private String getType(oldValue, newValue) {
-		if (oldValue == newValue) {
-			return "SAME"
-		} else if (oldValue == null) {
-			return "ADDED"
-		} else if (newValue == null) {
-			return "DELETED"
-		} else{
-			return "MODIFIED"
 		}
 	}
 }

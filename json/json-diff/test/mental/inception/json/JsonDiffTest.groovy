@@ -33,11 +33,11 @@ class JsonDiffTest {
 		assertEquals('{"root":{"color":{"old":"green","new":"green","$type":"SAME"},"position":{"old":"0.0","new":"0.0","$type":"SAME"}}}', render)
 	}
 
-//	@Test
-//	void compareObjectWithDifferentValuesAndNull() {
-//		def render = renderCompare('{"color":null}', '{"color":"red"}')
-//		assertEquals('{"root":{"color":{"old":null,"new":"red","$type":"MODIFIED"}}}', render)
-//	}
+	@Test
+	void compareObjectWithDifferentValuesAndNull() {
+		def render = renderCompare('{"color":null}', '{"color":"red"}')
+		assertEquals('{"root":{"color":{"old":null,"new":"red","$type":"MODIFIED"}}}', render)
+	}
 	
 	@Test
 	void compareObjectWithDifferentValues() {
@@ -91,6 +91,12 @@ class JsonDiffTest {
 	public void compareObjectsWithAddedKey() {
 		def render = renderCompare('{"position":"0.0"}', '{"color":"green","position":"0.0"}')
 		assertEquals('{"root":{"color":{"old":null,"new":"green","$type":"ADDED"},"position":{"old":"0.0","new":"0.0","$type":"SAME"}}}', render)
+	}
+	
+	@Test
+	public void compareObjectsWithSameAddedDeletedKeys() {
+		def render = renderCompare('{"position":"0.0","image":"/disk/image.png"}', '{"color":"green","position":"1.0"}')
+		assertEquals('{"root":{"color":{"old":null,"new":"green","$type":"ADDED"},"image":{"old":"/disk/image.png","new":null,"$type":"DELETED"},"position":{"old":"0.0","new":"1.0","$type":"MODIFIED"}}}', render)
 	}
 
 	private def renderCompare(json1, json2) {

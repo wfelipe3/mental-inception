@@ -21,6 +21,7 @@ class DiffNodeBuilder {
 			createKeepedKeysNodes(nodeValues)
 			createDeletedKeysNodes(nodeValues)
 			createAddedKeysNodes(nodeValues)
+			nodes = createObjectNode(nodeValues)
 		}
 	}
 
@@ -34,48 +35,56 @@ class DiffNodeBuilder {
 			if (areBothObjects(key)) {
 				createNodeObject(key, nodeValues)
 			} else {
-				createNodeValue(key, nodeValues)
+				nodeValues.put(key, createKeepedValueNode(key))
 			}
 		}
-		createObjectNode(nodeValues)
 	}
-	
+
 	private createDeletedKeysNodes(nodeValues) {
 		diffKeys.keysOnlyInJson1.each { key ->
-			createNodeValue(key, nodeValues)
+			nodeValues.put(key, createDeletedValueNode(key))
 		}
-		createObjectNode(nodeValues)
 	}
-	
+
 	private createAddedKeysNodes(nodeValues) {
 		diffKeys.keysOnlyInJson2.each { key ->
-			createNodeValue(key, nodeValues)
+			nodeValues.put(key, createAddedValueNode(key))
 		}
-		createObjectNode(nodeValues)
 	}
 
 	private boolean areBothObjects(key) {
 		return diffKeys.json1[key] instanceof Map && diffKeys.json2[key] instanceof Map
 	}
-	
+
 	private createNodeObject(String key, Map nodeValues) {
 		def nodeValue = createObjectInnerNode(key)
 		nodeValues.put(key, nodeValue)
 	}
 
-	private createNodeValue(String key, Map nodeValues) {
-		def nodeValue = createValueNode(key)
-		nodeValues.put(key, nodeValue)
-	}
-	
-	private DiffNode createValueNode(String key) {
+	private DiffNode createKeepedValueNode(String key) {
 		def oldValue = diffKeys.json1[key]
 		def newValue = diffKeys.json2[key]
 		def values = new Expando(oldValue:oldValue, newValue:newValue)
-		SameNodeBuilder nodeBuilder = new SameNodeBuilder(formatFactory)
+		KeepedNodeBuilder nodeBuilder = new KeepedNodeBuilder(formatFactory)
 		return nodeBuilder.buildNode(values)
 	}
-	
+
+	private DiffNode createDeletedValueNode(String key) {
+		def oldValue = diffKeys.json1[key]
+		def newValue = diffKeys.json2[key]
+		def values = new Expando(oldValue:oldValue, newValue:newValue)
+		DeletedNodeBuilder nodeBuilder = new DeletedNodeBuilder(formatFactory)
+		return nodeBuilder.buildNode(values)
+	}
+
+	private DiffNode createAddedValueNode(String key) {
+		def oldValue = diffKeys.json1[key]
+		def newValue = diffKeys.json2[key]
+		def values = new Expando(oldValue:oldValue, newValue:newValue)
+		AddedNodeBuilder nodeBuilder = new AddedNodeBuilder(formatFactory)
+		return nodeBuilder.buildNode(values)
+	}
+
 	private createObjectInnerNode(String key) {
 		def innerDiffKeys = new JsonDiffKeys(diffKeys.json1[key], diffKeys.json2[key])
 		DiffNodeBuilder builder = new DiffNodeBuilder(formatFactory, innerDiffKeys)
@@ -83,9 +92,9 @@ class DiffNodeBuilder {
 		return builder.getNodes()
 	}
 
-	private createObjectNode(def nodeValues) {
-		def formatter = formatFactory.getFormatter("OBJECT")
-		nodes = new DiffNode(formatter:formatter, value:nodeValues)
+	private createObjectNode(nodeValues) {
+		ObjectNodeBuilder nodeBuilder = new ObjectNodeBuilder(formatFactory)
+		return nodeBuilder.buildNode(nodeValues)
 	}
 
 	def getNodes() {
