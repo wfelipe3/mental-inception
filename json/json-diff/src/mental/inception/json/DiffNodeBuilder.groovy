@@ -25,8 +25,8 @@ class DiffNodeBuilder {
 	}
 
 	private def createEmptyNode() {
-		def formatter = formatFactory.getFormatter("EMPTY")
-		return new DiffNode(formatter:formatter, value:"")
+		EmptyNodeBuilder builder = new EmptyNodeBuilder(formatFactory)
+		return builder.buildNode("")
 	}
 
 	private createKeepedKeysNodes(nodeValues) {
@@ -71,9 +71,9 @@ class DiffNodeBuilder {
 	private DiffNode createValueNode(String key) {
 		def oldValue = diffKeys.json1[key]
 		def newValue = diffKeys.json2[key]
-		def formatter = formatFactory.getFormatter("VALUE")
-		def changedValues = new Expando(oldValue:oldValue, newValue:newValue)
-		return new DiffNode(formatter:formatter, value:changedValues)
+		def values = new Expando(oldValue:oldValue, newValue:newValue)
+		SameNodeBuilder nodeBuilder = new SameNodeBuilder(formatFactory)
+		return nodeBuilder.buildNode(values)
 	}
 	
 	private createObjectInnerNode(String key) {
