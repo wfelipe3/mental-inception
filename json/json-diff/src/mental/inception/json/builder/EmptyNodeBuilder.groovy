@@ -1,4 +1,4 @@
-package mental.inception.json
+package mental.inception.json.builder
 
 import mental.inception.node.DiffNode
 

@@ -1,5 +1,11 @@
 package mental.inception.json
 
+import mental.inception.json.builder.EmptyNodeBuilder;
+import mental.inception.json.builder.KeepedNodesBuilder;
+import mental.inception.json.node.AddedNodeBuilder;
+import mental.inception.json.node.DeletedNodeBuilder;
+import mental.inception.json.node.NodeBuilder;
+import mental.inception.json.node.ObjectNodeBuilder;
 import mental.inception.node.DiffNode
 
 class DiffNodeBuilder {
@@ -14,11 +20,11 @@ class DiffNodeBuilder {
 	}
 
 	void buildNodes() {
-		if (diffKeys.areBothKeysEmpty()) {
+		if (diffKeys.isEmpty()) {
 			nodes = createEmptyNode()
 		} else {
 			Map nodeValues = [:] as TreeMap
-			createKeepedKeysNodes(nodeValues)
+			nodeValues.putAll createKeepedKeysNodes().entrySet()
 			createDeletedKeysNodes(nodeValues)
 			createAddedKeysNodes(nodeValues)
 			nodes = createObjectNode(nodeValues)
@@ -30,14 +36,9 @@ class DiffNodeBuilder {
 		return builder.buildNode("")
 	}
 
-	private createKeepedKeysNodes(nodeValues) {
-		diffKeys.keysInBothJson.each { key ->
-			if (areBothObjects(key)) {
-				createNodeObject(key, nodeValues)
-			} else {
-				nodeValues.put(key, createKeepedValueNode(key))
-			}
-		}
+	private createKeepedKeysNodes() {
+		KeepedNodesBuilder keepedNodeBuilder = new KeepedNodesBuilder(formatFactory, diffKeys)
+		return keepedNodeBuilder.buildNodes()
 	}
 
 	private createDeletedKeysNodes(nodeValues) {
@@ -50,23 +51,6 @@ class DiffNodeBuilder {
 		diffKeys.keysOnlyInJson2.each { key ->
 			nodeValues.put(key, createAddedValueNode(key))
 		}
-	}
-
-	private boolean areBothObjects(key) {
-		return diffKeys.json1[key] instanceof Map && diffKeys.json2[key] instanceof Map
-	}
-
-	private createNodeObject(String key, Map nodeValues) {
-		def nodeValue = createObjectInnerNode(key)
-		nodeValues.put(key, nodeValue)
-	}
-
-	private DiffNode createKeepedValueNode(String key) {
-		def oldValue = diffKeys.json1[key]
-		def newValue = diffKeys.json2[key]
-		def values = new Expando(oldValue:oldValue, newValue:newValue)
-		KeepedNodeBuilder nodeBuilder = new KeepedNodeBuilder(formatFactory)
-		return nodeBuilder.buildNode(values)
 	}
 
 	private DiffNode createDeletedValueNode(String key) {

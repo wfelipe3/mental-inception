@@ -1,32 +1,20 @@
-package mental.inception.json
+package mental.inception.json.node
 
 import mental.inception.node.DiffNode
 
-class KeepedNodeBuilder {
+class NodeBuilder {
 
-	private def formatFactory
+	private def formatter
 
-	KeepedNodeBuilder(formatFactory) {
-		this.formatFactory = formatFactory
+	NodeBuilder(formatter) {
+		this.formatter = formatter
 	}
 
 	def buildNode(value) {
-		return new DiffNode(formatter:getFormatter(), value:createValue(value))
-	}
-
-	private def getFormatter() {
-		return formatFactory.getFormatter("VALUE")
+		return new DiffNode(formatter:formatter, value:createValue(value))
 	}
 
 	private Expando createValue(value) {
-		return new Expando(oldValue:value.oldValue, newValue:value.newValue, type:getType(value))
-	}
-
-	private String getType(value) {
-		if (value.oldValue == value.newValue) {
-			return "SAME"
-		} else {
-			return "MODIFIED"
-		}
+		return new Expando(oldValue:value.oldValue, newValue:value.newValue, type:value.type)
 	}
 }

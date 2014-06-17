@@ -15,7 +15,7 @@ class JsonDiffKeys {
 		initJsonKeys()
 	}
 
-	boolean areBothKeysEmpty() {
+	boolean isEmpty() {
 		return json1.isEmpty() && json2.isEmpty()
 	}
 

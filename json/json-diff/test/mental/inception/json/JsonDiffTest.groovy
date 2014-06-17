@@ -20,7 +20,7 @@ class JsonDiffTest {
 		def render = renderCompare('{"color":null}', '{"color":null}')
 		assertEquals('{"root":{"color":{"old":null,"new":null,"$type":"SAME"}}}', render)
 	}
-	
+
 	@Test
 	public void compareEqualObjects() {
 		def render = renderCompare('{"color":"green"}', '{"color":"green"}')
@@ -38,7 +38,7 @@ class JsonDiffTest {
 		def render = renderCompare('{"color":null}', '{"color":"red"}')
 		assertEquals('{"root":{"color":{"old":null,"new":"red","$type":"MODIFIED"}}}', render)
 	}
-	
+
 	@Test
 	void compareObjectWithDifferentValues() {
 		def render = renderCompare('{"color":"green"}', '{"color":"red"}')
@@ -92,7 +92,7 @@ class JsonDiffTest {
 		def render = renderCompare('{"position":"0.0"}', '{"color":"green","position":"0.0"}')
 		assertEquals('{"root":{"color":{"old":null,"new":"green","$type":"ADDED"},"position":{"old":"0.0","new":"0.0","$type":"SAME"}}}', render)
 	}
-	
+
 	@Test
 	public void compareObjectsWithSameAddedDeletedKeys() {
 		def render = renderCompare('{"position":"0.0","image":"/disk/image.png"}', '{"color":"green","position":"1.0"}')
@@ -105,8 +105,7 @@ class JsonDiffTest {
 	}
 
 	private def diffJson(String json1, String json2) {
-		def treeBuilder = new DiffTreeBuilder(new JsonFormatFactory())
-		def diff = new JsonDiff(treeBuilder, json1, json2)
-		return diff.compareDiff()
+		def diff = new JsonDiff(new JsonFormatFactory())
+		return diff.compareDiff(json1, json2)
 	}
 }
