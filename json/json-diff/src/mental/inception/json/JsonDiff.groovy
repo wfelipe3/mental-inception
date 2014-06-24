@@ -1,5 +1,7 @@
 package mental.inception.json
 
+import mental.inception.json.builder.DiffTreeBuilder;
+import mental.inception.json.node.DiffNodeBuilder;
 import mental.inception.node.DiffNode
 
 import com.mental.inception.json.JsonParser
@@ -7,32 +9,24 @@ import com.mental.inception.json.JsonParser
 
 class JsonDiff {
 
-	private def formatFactory
+	private def nodeBuilderFactory
 
-	JsonDiff(formatFactory) {
-		this.formatFactory = formatFactory
+	JsonDiff(nodeBuilderFactory) {
+		this.nodeBuilderFactory = nodeBuilderFactory
 	}
 
 	def compareDiff(value1, value2) {
 		def diffKeys = buildDiffKeys(value1, value2)
-		def tree = buildNodeTree(diffKeys)
-		return createRootNode(tree)
+		return buildNodeTree(diffKeys)
 	}
 
 	private def buildDiffKeys(value1, value2) {
-		JsonParser parser = new JsonParser()
-		def json1 = parser.parse(value1)
-		def json2 = parser.parse(value2)
-		return new JsonDiffKeys(json1, json2)
+		JsonDiffParser parser = new JsonDiffParser(value1:value1, value2:value2)
+		return parser.parseKeys()
 	}
 
 	private def buildNodeTree(diffKeys) {
-		DiffNodeBuilder nodeBuilder = new DiffNodeBuilder(formatFactory, diffKeys)
-		nodeBuilder.buildNodes()
-		return nodeBuilder.getNodes()
-	}
-
-	private createRootNode(def value) {
-		return new DiffNode(formatter:formatFactory.getFormatter("ROOT"), value:value)
+		DiffTreeBuilder treeBuilder = new DiffTreeBuilder(nodeBuilderFactory)
+		return treeBuilder.build(diffKeys)
 	}
 }

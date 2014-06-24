@@ -1,11 +1,6 @@
-package mental.inception.json
+package mental.inception.json.node
 
-import mental.inception.json.builder.EmptyNodeBuilder;
-import mental.inception.json.builder.KeepedNodesBuilder;
-import mental.inception.json.node.AddedNodeBuilder;
-import mental.inception.json.node.DeletedNodeBuilder;
-import mental.inception.json.node.NodeBuilder;
-import mental.inception.json.node.ObjectNodeBuilder;
+import mental.inception.json.JsonDiffValues
 import mental.inception.node.DiffNode
 
 class DiffNodeBuilder {
@@ -31,10 +26,10 @@ class DiffNodeBuilder {
 		}
 	}
 
-	private def createEmptyNode() {
-		EmptyNodeBuilder builder = new EmptyNodeBuilder(formatFactory)
-		return builder.buildNode("")
-	}
+//	private def createEmptyNode() {
+//		EmptyNodeBuilder builder = new EmptyNodeBuilder(formatFactory)
+//		return builder.buildNode("")
+//	}
 
 	private createKeepedKeysNodes() {
 		KeepedNodesBuilder keepedNodeBuilder = new KeepedNodesBuilder(formatFactory, diffKeys)
@@ -70,7 +65,7 @@ class DiffNodeBuilder {
 	}
 
 	private createObjectInnerNode(String key) {
-		def innerDiffKeys = new JsonDiffKeys(diffKeys.json1[key], diffKeys.json2[key])
+		def innerDiffKeys = new JsonDiffValues(diffKeys.json1[key], diffKeys.json2[key])
 		DiffNodeBuilder builder = new DiffNodeBuilder(formatFactory, innerDiffKeys)
 		builder.buildNodes()
 		return builder.getNodes()
