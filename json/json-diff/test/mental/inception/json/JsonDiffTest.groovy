@@ -65,9 +65,29 @@ class JsonDiffTest {
 	}
 
 	@Test
+	void compareEmptyArrayWithValueArray() {
+		def render = renderCompare('[]', '["blue", "red", "45,45,34"]')
+		assertEquals([root:[
+				[old:null, "new":"blue", '$type':"ADDED"],
+				[old:null, "new":"red", '$type':"ADDED"],
+				[old:null, "new":"45,45,34", '$type':"ADDED"]
+			]], render)
+	}
+
+	@Test
 	void compareValueObjectWithEmptyObject() {
 		def render = renderCompare('{"color":"blue"}', '{}')
 		assertEquals([root:[color:["old":"blue", "new":null, '$type':"REMOVED"]]], render)
+	}
+
+	@Test
+	void compareArrayValueWithEmptyArray() {
+		def render = renderCompare('["blue", "red", "45,45,34"]', '[]')
+		assertEquals([root:[
+				["new":null, "old":"blue", '$type':"REMOVED"],
+				["new":null, "old":"red", '$type':"REMOVED"],
+				["new":null, "old":"45,45,34", '$type':"REMOVED"]
+			]], render)
 	}
 
 	@Test
@@ -78,40 +98,86 @@ class JsonDiffTest {
 	}
 
 	@Test
+	void compareArrayWithObjectAndCompareEmptyArray() {
+		def render = renderCompare('[{"color":"red", "rbg":"23,23,64"}, {"color":"blue", "rbg":"45,45,45"}]', '[]')
+		assertEquals([root:[
+				["new":null, "old":["color":"red", "rbg":"23,23,64"], '$type':"REMOVED"],
+				["new":null, "old":["color":"blue", "rbg":"45,45,45"], '$type':"REMOVED"]
+			]], render)
+	}
+
+
+	@Test
 	public void compareEqualObjectsWithNullValue() {
 		def render = renderCompare('{"color":null}', '{"color":null}')
 		assertEquals([root:[color:[old:null, "new":null, '$type':"SAME"]]], render)
 	}
-	//
-	//	@Test
-	//	public void compareEqualObjects() {
-	//		def render = renderCompare('{"color":"green"}', '{"color":"green"}')
-	//		assertEquals('{"root":{"color":{"old":"green","new":"green","$type":"SAME"}}}', render)
-	//	}
-	//
-	//	@Test
-	//	public void compareEqualObjectsWithTwoProperties() {
-	//		def render = renderCompare('{"color":"green", "position":"0.0"}', '{"color":"green", "position":"0.0"}')
-	//		assertEquals('{"root":{"color":{"old":"green","new":"green","$type":"SAME"},"position":{"old":"0.0","new":"0.0","$type":"SAME"}}}', render)
-	//	}
-	//
-	//	@Test
-	//	void compareObjectWithDifferentValuesAndNull() {
-	//		def render = renderCompare('{"color":null}', '{"color":"red"}')
-	//		assertEquals('{"root":{"color":{"old":null,"new":"red","$type":"MODIFIED"}}}', render)
-	//	}
-	//
-	//	@Test
-	//	void compareObjectWithDifferentValues() {
-	//		def render = renderCompare('{"color":"green"}', '{"color":"red"}')
-	//		assertEquals('{"root":{"color":{"old":"green","new":"red","$type":"MODIFIED"}}}', render)
-	//	}
-	//
-	//	@Test
-	//	void compareObjectWithEqualInternalObjects() {
-	//		def render = renderCompare('{"window":{"color":"green"}}', '{"window":{"color":"green"}}')
-	//		assertEquals('{"root":{"window":{"color":{"old":"green","new":"green","$type":"SAME"}}}}', render)
-	//	}
+
+	@Test
+	public void compareEqualArraysWithNullValue() {
+		def render = renderCompare('[null]', '[null]')
+		assertEquals([root:[
+				["new":null, "old":null, '$type':"SAME"]
+			]], render)
+	}
+
+
+	@Test
+	public void compareEqualObjects() {
+		def render = renderCompare('{"color":"green"}', '{"color":"green"}')
+		assertEquals([root:[color:[old:"green", "new":"green", '$type':"SAME"]]], render)
+	}
+
+	@Test
+	public void comapreEqualArray() {
+		def render = renderCompare('["red", "blue", "green"]', '["red", "blue", "green"]')
+		assertEquals([root:[
+				["new":"red", "old":"red", '$type':"SAME"],
+				["new":"blue", "old":"blue", '$type':"SAME"],
+				["new":"green", "old":"green", '$type':"SAME"]
+			]], render)
+	}
+
+	@Test
+	public void compareEqualObjectsWithTwoProperties() {
+		def render = renderCompare('{"color":"green", "position":"0.0"}', '{"color":"green", "position":"0.0"}')
+		assertEquals([root:[color:[old:"green", "new":"green", '$type':"SAME"],
+				position:["old":"0.0","new":"0.0",'$type':"SAME"]]], render)
+	}
+
+	@Test
+	void compareObjectWithDifferentValuesAndNull() {
+		def render = renderCompare('{"color":null}', '{"color":"red"}')
+		assertEquals(["root":["color":["old":null,"new":"red",'$type':"MODIFIED"]]], render)
+	}
+
+	@Test
+	void compareArrayWithDifferentValuesAndNull() {
+		def render = renderCompare('[null]', '["red"]')
+		assertEquals(["root":[
+				["old":null,"new":"red",'$type':"MODIFIED"]
+			]], render)
+	}
+
+	@Test
+	void compareObjectWithDifferentValues() {
+		def render = renderCompare('{"color":"green"}', '{"color":"red"}')
+		assertEquals(["root":["color":["old":"green","new":"red",'$type':"MODIFIED"]]], render)
+	}
+
+	@Test
+	void compareArraysWithDifferentValues() {
+		def render = renderCompare('[1]', '[2]')
+		assertEquals(["root":[
+				["old":1,"new":2,'$type':"MODIFIED"]
+			]], render)
+	}
+
+	@Test
+	void compareObjectWithEqualInternalObjects() {
+		def render = renderCompare('{"window":{"color":"green"}}', '{"window":{"color":"green"}}')
+		assertEquals(["root":["window":["color":["old":"green","new":"green",'$type':"SAME"]]]], render)
+	}
 	//
 	//	@Test
 	//	void compareObjectWithDifferentInternalObjects() {
